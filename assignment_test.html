@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Analysis of the algorithms</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Literata' rel='stylesheet'>
+  <style>
+  body {
+    font-family: 'Literata';font-size: 22px;
+    }
+  </style>
+</head>
+<body>
+<div class="container-fluid text-center">    
+  <div class="row content">
+    <div class="col-sm-8 col-sm-offset-2 text-left">
+       <h1>Analysis of Tidier Algorithm</h1>
+       <ol>
+         <li>
+           <h3>We tested our program on multiple runs and found that it works in accordance with the tidier drawing algorithm</h3>
+           <div class = "row">
+             <img src="./images/Balanced_31.PNG" width="100%">
+             <h4 class="text-center"> A balanced binary tree having 31 nodes</h4>
+             <hr>
+           </div>
+           <div class = "row">
+            <img src="./images/Complex_1.PNG" width="100%">
+            <hr>
+          </div>
+          <div class = "row">
+            <img src="./images/Custom_20.PNG" width="100%">
+            <h4 class="text-center" >A single line binary tree having 20 nodes</h4>
+            <hr>
+          </div>
+                    <div class = "row">
+            <img src="./images/Error2.PNG" width="100%">
+            <h4 class="text-center">A binary tree which couldn't fit in the screen size</h4>
+            <hr>
+          </div>
+          <div class = "row">
+            <img src="./images/Random_20.PNG" width="100%">
+            <h4 class="text-center">A randomized binary tree having 20 nodes</h4>
+            <hr>
+          </div>
+         </li>
+         <li> 
+          <h3>A balanced tree of 'n' nodes gave the following timings:</h3>
+            
+            <table style="margin-top: 5%;width: 100%;height: 50vh;"; height="600vh" border="1" class="text-center">
+              <tr>
+                <td width="80" class="centerer">Number of Nodes</td>
+                <td width="213" class="centerer">Time Execution for Tidier</td>
+                <td width="218" class="centerer">Time taken to draw Tree</td>
+                <td width="122"><span class="centerer">Memory Usage (MB)</span></td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>0</td>
+                <td>0.079</td>
+                <td>39.8</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td>0</td>
+                <td>0.492</td>
+                <td>39.8</td>
+              </tr>
+              <tr>
+                <td>20</td>
+                <td>0</td>
+                <td>0.98</td>
+                <td>39.8</td>
+              </tr>
+              <tr>
+                <td>50</td>
+                <td>0</td>
+                <td>2.932</td>
+                <td>39.8</td>
+              </tr>
+              <tr>
+                <td>100</td>
+                <td>0</td>
+                <td>5.131</td>
+                <td>39.8</td>
+              </tr>
+              <tr>
+                <td>500</td>
+                <td>0</td>
+                <td>3.908</td>
+                <td>39.9</td>
+              </tr>
+              <tr>
+                <td>1000</td>
+                <td>0</td>
+                <td>4.016</td>
+                <td>40</td>
+              </tr>
+              <tr>
+                <td>10000</td>
+                <td>0.002</td>
+                <td>5.88</td>
+                <td>41.9</td>
+              </tr>
+              <tr>
+                <td>100000</td>
+                <td>0.015</td>
+                <td>12.08</td>
+                <td>59.1</td>
+              </tr>
+              <tr>
+                <td>1000000</td>
+                <td>0.138</td>
+                <td>83.866</td>
+                <td>231.3</td>
+              </tr>
+              
+              <tr>
+                <td>10000000</td>
+                <td>Crashed</td>
+                <td>Crashed</td>
+                <td>Crashed</td>
+              </tr>
+              </table>
+
+              <h3>The graphical analysis is shown below :</h3>
+              <img src="./images/graph.png">
+            </li>
+            <li>
+              <h3>Issues in Coding</h3><br>
+              <p style="font-size: 20px;"><t>
+                <ul>
+                  <li>We have defined grid and the exe file  (by gluOrtho2d & glutInitWindowSize respectively) as one of our laptop's screen sizes and as that varies the actual display window size will vary on different screen sizes (technically resolution).</li><br>
+                  <li>The grid that we have defined is starting at bottom left (being origin and increasing in both directions of the screen) so in order to print the root of the tree in the center we needed to do some tweaking.</li><br>
+                  <li>Everytime we resize the window or move it to a new position it renders the entire tree from the beginning. We could solve this by calling a function to clear the screen but we will keep it on the list for additional updates.</li></ul></t></p><br>
+            </li>
+            <li>
+              <h3>General Discussion </h3><br>
+              <p style="font-size: 20px;"><t>
+                <ul>
+                  <li>We tried hard coding the tree for specific size and daughters, but then after a lot of issues and frustration we implemented the function for any tree that we can think of by recursion.</li><br>
+                  <li>It was a pain to actually implement the function to render the individual pixel everytime, and then end the function call, but it was fun to actually learn about all the functions and rendered many other projects on the way.</li><br>
+                </ul>
+                </t></p>
+            </li>
+            <li>
+              <h3>References</h3>
+              <p style="font-size: 20px;"><t>
+                <ul>
+                  <li>Tidy and Tidier Drawings of Trees paper and general discussion with other teams.</li><br>
+                  <li><a href="https://geeksforgeeks.org" target="blank">Geeks for Geeks</a></li><br>
+                  <li><a href="https://stackoverflow.com" target="blank"> Stackoverflow</a></li><br>
+                  <li><a href="https://youtube.com" target="blank">Youtube tutorials</a></li><br>
+                  <li>Lecture slides of the course ( IS F311 Computer Graphics )</li>
+                </ul>
+            </t></p>
+            </li>
+          </ol> 
+    </div>
+    
+  </div>
+</div>
