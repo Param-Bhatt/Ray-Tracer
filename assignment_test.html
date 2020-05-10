@@ -20,110 +20,82 @@
     <div class="col-sm-8 col-sm-offset-2 text-left">
        <h1>Analysis of Tidier Algorithm</h1>
        <ol>
-         <li>
-           <h3>We tested our program on multiple runs and found that it works in accordance with the tidier drawing algorithm</h3>
-           <div class = "row">
-             <img src="./images/Balanced_31.PNG" width="100%">
-             <h4 class="text-center"> A balanced binary tree having 31 nodes</h4>
-             <hr>
-           </div>
-           <div class = "row">
-            <img src="./images/Complex_1.PNG" width="100%">
-            <hr>
-          </div>
-          <div class = "row">
-            <img src="./images/Custom_20.PNG" width="100%">
-            <h4 class="text-center" >A single line binary tree having 20 nodes</h4>
-            <hr>
-          </div>
-                    <div class = "row">
-            <img src="./images/Error2.PNG" width="100%">
-            <h4 class="text-center">A binary tree which couldn't fit in the screen size</h4>
-            <hr>
-          </div>
-          <div class = "row">
-            <img src="./images/Random_20.PNG" width="100%">
-            <h4 class="text-center">A randomized binary tree having 20 nodes</h4>
-            <hr>
-          </div>
-         </li>
+        
          <li> 
-          <h3>A balanced tree of 'n' nodes gave the following timings:</h3>
+          <h3>Running our program on various sizes and depths , we found the following :</h3>
             
             <table style="margin-top: 5%;width: 100%;height: 50vh;"; height="600vh" border="1" class="text-center">
               <tr>
-                <td width="80" class="centerer">Number of Nodes</td>
-                <td width="213" class="centerer">Time Execution for Tidier</td>
-                <td width="218" class="centerer">Time taken to draw Tree</td>
-                <td width="122"><span class="centerer">Memory Usage (MB)</span></td>
+                <td width="80" class="centerer">Max depth of our image</td>
+                <td width="213" class="centerer">The size of our image</td>
+                <td width="218" class="centerer">Time taken to draw</td>
+                <td class="centerer">Image obtained</td>
               </tr>
               <tr>
-                <td>1</td>
-                <td>0</td>
-                <td>0.079</td>
-                <td>39.8</td>
+                <td>5</td>
+                <td>400px x 300px</td>
+                <td>23.1s</td>
+                <td><img src="resources/400x300 23.1s.png"></td>
+                
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>640px x 480px</td>
+                <td>59.1s</td>
+                <td><img src="resources/640x480 59.1s.png"</td>
+                
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>1600px x 900px</td>
+                <td>4mins 51s</td>
+                <td><img src="resources/1600x900 4min51s.png"></td>
+                
+              </tr>
+
+              <tr>
+                <td>10</td>
+                <td>400px x 300px</td>
+                <td>23.1s</td>
+                <td><img src="resources/400x300 23.1s 10.png"></td>
+                
               </tr>
               <tr>
                 <td>10</td>
-                <td>0</td>
-                <td>0.492</td>
-                <td>39.8</td>
+                <td>640px x 480px</td>
+                <td>59.3s</td>
+                <td><img src="resources/640x480 59.3s 10.png"></td>
+                
               </tr>
               <tr>
-                <td>20</td>
-                <td>0</td>
-                <td>0.98</td>
-                <td>39.8</td>
-              </tr>
-              <tr>
-                <td>50</td>
-                <td>0</td>
-                <td>2.932</td>
-                <td>39.8</td>
+                <td>10</td>
+                <td>1600px x 900px</td>
+                <td>4mins 57s</td>
+                <td><img src="resources/1600x900 4min57s 10.png"></td>
+                
               </tr>
               <tr>
                 <td>100</td>
-                <td>0</td>
-                <td>5.131</td>
-                <td>39.8</td>
+                <td>400px x 300px</td>
+                <td>23.5s</td>
+                <td><img src="resources/400x300 23.5s 100.png"></td>
+                
               </tr>
               <tr>
-                <td>500</td>
-                <td>0</td>
-                <td>3.908</td>
-                <td>39.9</td>
+                <td>100</td>
+                <td>640px x 480px</td>
+                <td>60s</td>
+                <td><img src="resources/640x480 60s 100.png"></td>
+                
               </tr>
               <tr>
-                <td>1000</td>
-                <td>0</td>
-                <td>4.016</td>
-                <td>40</td>
-              </tr>
-              <tr>
-                <td>10000</td>
-                <td>0.002</td>
-                <td>5.88</td>
-                <td>41.9</td>
-              </tr>
-              <tr>
-                <td>100000</td>
-                <td>0.015</td>
-                <td>12.08</td>
-                <td>59.1</td>
-              </tr>
-              <tr>
-                <td>1000000</td>
-                <td>0.138</td>
-                <td>83.866</td>
-                <td>231.3</td>
+                <td>100</td>
+                <td>1600px x 900px</td>
+                <td>5mins 2s</td>
+                <td><img src="resources/1600x900 5min2secs 100.png"></td>
+                
               </tr>
               
-              <tr>
-                <td>10000000</td>
-                <td>Crashed</td>
-                <td>Crashed</td>
-                <td>Crashed</td>
-              </tr>
               </table>
 
               <h3>The graphical analysis is shown below :</h3>
@@ -133,16 +105,16 @@
               <h3>Issues in Coding</h3><br>
               <p style="font-size: 20px;"><t>
                 <ul>
-                  <li>We have defined grid and the exe file  (by gluOrtho2d & glutInitWindowSize respectively) as one of our laptop's screen sizes and as that varies the actual display window size will vary on different screen sizes (technically resolution).</li><br>
-                  <li>The grid that we have defined is starting at bottom left (being origin and increasing in both directions of the screen) so in order to print the root of the tree in the center we needed to do some tweaking.</li><br>
-                  <li>Everytime we resize the window or move it to a new position it renders the entire tree from the beginning. We could solve this by calling a function to clear the screen but we will keep it on the list for additional updates.</li></ul></t></p><br>
+                  <li>The first and the main issue we found was in the idea and writing the algorithm for our tracer. It took us a lot of time and research to understand the complete geometry involved behind the working of a simple tracer. We misunderstood some things in between and hence were setback in the middle too. However , we finally did understand the complete geometry as explained in project and wrote out the algorithm for it.</li><br>
+                  <li>Another issue we faced was in implementing the entire algorithms together as one.Some of the issues include background being white led to the shadows being white . We also generated shades using diffusion coefficient for colouring our objects accordingly ( This is called Lambert Shading ) and also used Blinn-Phong shading for illumiating the spot where light is concentrated the most. </li><br>
+                  <li>Often, we had to readjust our code and update it accordingly as some of the light rays would not illuminate one particular spot, or illuminated one spot only and ignored all the rest. However, when it all ended and fell into place as one program , we really loved our output obtained and our code runs successfully as of now.</li></ul></t></p><br>
             </li>
             <li>
               <h3>General Discussion </h3><br>
               <p style="font-size: 20px;"><t>
                 <ul>
-                  <li>We tried hard coding the tree for specific size and daughters, but then after a lot of issues and frustration we implemented the function for any tree that we can think of by recursion.</li><br>
-                  <li>It was a pain to actually implement the function to render the individual pixel everytime, and then end the function call, but it was fun to actually learn about all the functions and rendered many other projects on the way.</li><br>
+                  <li>It takes a lot of effort to write a tracer , especially if you dont know what you are doing in the first place. We had to sit down , and take a proper read through not only the entire papers but also multiple youtube videos. After all this, we referred some other websites too for further information of functions that we needed and implementing our ideas.</li><br>
+                  <h2>Result:</h2><br><li>After all of our efforts , we feel we have successfully implemented our research paper that we had chosen, and it is a fun tool to even play around with. For example, we tried making negative image of our scene , and it worked wonderfully too. This program , can also help in explaining a lot of sub topics of ray optics that we learnt in physics during our intermediate as well as 10th class.</li><li>In addition to this , we also learnt about how tracers in general work, how the depth that we allow a tracer affects it effectivness as well as accuracy in the image , and the time that it takes to build it. We also realise that scanning each pixel individually is not the most optimised solution for a tracer.</li><br>
                 </ul>
                 </t></p>
             </li>
@@ -150,11 +122,10 @@
               <h3>References</h3>
               <p style="font-size: 20px;"><t>
                 <ul>
-                  <li>Tidy and Tidier Drawings of Trees paper and general discussion with other teams.</li><br>
                   <li><a href="https://geeksforgeeks.org" target="blank">Geeks for Geeks</a></li><br>
                   <li><a href="https://stackoverflow.com" target="blank"> Stackoverflow</a></li><br>
                   <li><a href="https://youtube.com" target="blank">Youtube tutorials</a></li><br>
-                  <li>Lecture slides of the course ( IS F311 Computer Graphics )</li>
+                  <li><a href="https://scratchapixel.com" target="blank">scratchapixel</a></li>
                 </ul>
             </t></p>
             </li>
