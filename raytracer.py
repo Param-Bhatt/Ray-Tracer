@@ -16,9 +16,9 @@ import matplotlib.pyplot as plt
 
 """Here we have defined the variables for the width and height of our viewing window , can change it accordingly"""
 
-w = 1280
+width = 400
 """Defining the width size of our window"""
-h = 720
+height = 300
 """Defining the height of our window """
 
 
@@ -129,11 +129,11 @@ def trace_ray(rayO, rayD):
     <li>Coloring time....yaay 
     <br>Default light and material parameters.<br>
     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp ambient = .05<br>
-    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp diffuse_c = 1.<br>
-    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp specular_c = 1.<br>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp diffuse_coeff = 1.<br>
+    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp specular_coeff = 1.<br>
     &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp specular_k = 50<br>
     <li> Ambient variable sets the colour of the ray of light that is going to pass from our light source.
-    <li>Diffuse_c is the variable that comes into picture for diffuse coloring. This is because when a light hits an object , it cant be lighted the same way for all the points of the object , as different light rays will hit them. Hence this is used for changing the diffusing accordingly.
+    <li>diffuse_coeff is the variable that comes into picture for diffuse coloring. This is because when a light hits an object , it cant be lighted the same way for all the points of the object , as different light rays will hit them. Hence this is used for changing the diffusing accordingly.
     <li>specular colouring is used for showing the light where intensity is so high that it is seen by us as the source of the light itself.
     """
 
@@ -153,7 +153,7 @@ def trace_ray(rayO, rayD):
     # Find properties of the object.
     N = get_normal(obj, M)
     color = get_color(obj, M)
-    toL = normalize(L - M)
+    toL = normalize(Light_postion - M)
     toO = normalize(O - M)
     # Shadow: find if the point is shadowed or not.
     l = [intersect(M + N * .0001, toL, obj_sh) 
@@ -163,9 +163,9 @@ def trace_ray(rayO, rayD):
     # Start computing the color.
     col_ray = ambient
     # Lambert shading (diffuse).
-    col_ray += obj.get('diffuse_c', diffuse_c) * max(np.dot(N, toL), 0) * color
+    col_ray += obj.get('diffuse_coeff', diffuse_coeff) * max(np.dot(N, toL), 0) * color
     # Blinn-Phong shading (specular).
-    col_ray += obj.get('specular_c', specular_c) * max(np.dot(N, normalize(toL + toO)), 0) ** specular_k * color_light
+    col_ray += obj.get('specular_coeff', specular_coeff) * max(np.dot(N, normalize(toL + toO)), 0) ** specular_k * color_light
     return obj, M, N, col_ray
 
 def add_sphere(position, radius, color):
@@ -195,15 +195,15 @@ def add_plane(position, normal):
     """
     return dict(type='plane', position=np.array(position), 
         normal=np.array(normal),
-        color=lambda M: (color_plane0 
-            if (int(M[0] * 2) % 2) == (int(M[2] * 2) % 2) else color_plane1),
-        diffuse_c=.75, specular_c=.5, reflection=.25)
+        color=lambda M: (color_plane_white 
+            if (int(M[0] * 2) % 2) == (int(M[2] * 2) % 2) else color_plane_black),
+        diffuse_coeff=.75, specular_coeff=.5, reflection=.25)
 
-"""We start out by defining our objects. color_plane0 and color_plane1 are 3x1 matrices consisting of 1 and 0 respectively. We then add 3 spheres and a ground to our scene."""
+"""We start out by defining our objects. color_plane_white and color_plane_black are 3x1 matrices consisting of 1 and 0 respectively. We then add 3 spheres and a ground to our scene."""
 
 # List of objects.
-color_plane0 = 1. * np.ones(3)
-color_plane1 = 0. * np.ones(3)
+color_plane_white = 1. * np.ones(3)
+color_plane_black = 0. * np.ones(3)
 scene = [add_sphere([.75, .1, 1.], .6, [0., 0., 1.]),
          add_sphere([-.75, .1, 2.25], .6, [.5, .223, .5]),
          add_sphere([-2.75, .1, 3.5], .6, [1., .572, .184]),
@@ -216,26 +216,26 @@ The default parameters are intialised accordingly.
 """
 
 # Light position and color.
-L = np.array([5., 5., -10.])
+Light_postion = np.array([5., 5., -10.])
 """We start of with light positioned at (5,5,-10). Z-coordinate is negative , hence the light point is <u>behind us into the screen</u>."""
 color_light = np.ones(3)
 """ The color is initalised to (1,1,1) which is white. <br>"""
 # Default light and material parameters.
 ambient = .05
-diffuse_c = 1.
-specular_c = 1.
+diffuse_coeff = 1.
+specular_coeff = 1.
 specular_k = 50
 
-depth_max = 100  # Maximum number of light reflections.
+depth_max = 5  # Maximum number of light reflections.
 """Depth max tells us the number of light reflections that we want to allow. """
-col = np.zeros(3)  # Current color.
+color = np.zeros(3)  # Current color.
 O = np.array([0., 0.35, -1.])  # Camera.
 """<li> O is our camera . </li>
 """
 Q = np.array([0., 0., 0.])  # Camera pointing to.
 """    <li> Q is the pixel where our camera is pointing at.</li>
 """
-img = np.zeros((h, w, 3)) # Image window
+img = np.zeros((height, width, 3)) # Image window
 """    <li>We initialise imgage of shape height*width here , and each pixel will be a 3d array consisting of all 3 coordiantes.</li>
 """
 
@@ -255,13 +255,13 @@ def main():
     <li> Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.
     """
 
-    r = float(w) / h #we get the aspect ratio as 'r'
+    r = float(width) / height #we get the aspect ratio as 'r'
     # Screen coordinates: x0, y0, x1, y1.
     S = (-1., -1. / r + .25, 1., 1. / r + .25)
 
     # Loop through all pixels.
-    for i, x in enumerate(np.linspace(S[0], S[2], w)):
-        for j, y in enumerate(np.linspace(S[1], S[3], h)):
+    for i, x in enumerate(np.linspace(S[0], S[2], width)):
+        for j, y in enumerate(np.linspace(S[1], S[3], height)):
             col[:] = 0
             Q[:2] = (x, y)
             D = normalize(Q - O)
