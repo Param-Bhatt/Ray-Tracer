@@ -28,17 +28,17 @@ def normalize(vector):
     vector /= np.linalg.norm(vector)
     return vector
 
-def intersect_plane(camera, dir, P_plane, N_plane):
+def intersect_plane(camera, direction, P_plane, N_plane):
     """<li> O is our camera</li>
 <li> Q is the pixel at which our camera is pointing </li>
 <li> N_plane is our normal vector of the plane</li>
-<li> dir is our point of intersection with the plane. Hence OD will be ray directon here. </li>
+<li> direction is our point of intersection with the plane. Hence OD will be ray directon here. </li>
 <li> P_plane is our random point on the plane. The plane will be represented as P,N </li>
 """
     # Return the distance from O to the intersection of the ray (O, D) with the 
     # plane (P_plane, N_plane), or +inf if there is no intersection.
-    # camera and P_plane are 3D points, dir and N_plane (normal) are normalized vectors.
-    denom = np.dot(dir, N_plane)
+    # camera and P_plane are 3D points, direction and N_plane (normal) are normalized vectors.
+    denom = np.dot(direction, N_plane)
     if np.abs(denom) < 1e-6:
         return np.inf
     d = np.dot(P_plane - camera, N_plane) / denom
@@ -47,32 +47,31 @@ def intersect_plane(camera, dir, P_plane, N_plane):
     return d
 
 
-def intersect_sphere(camera, dir, C_sphere, R_sphere):
+def intersect_sphere(camera, direction, C_sphere, R_sphere):
     """<li>camera is our camera (<i>Its a point</i>)</li>
-<li>dir is the intersection point of the ray and sphere</li>
+<li>direction is the intersection point of the ray and sphere</li>
 <li>C_sphere is center of sphere</li>
 <li>R_sphere is is the radius of the sphere</li>
 
 This function gives us 2 points of intersection of the ray with our sphere
 """
-# Return the distance from O to the intersection of the ray (camera, dir) with the 
+# Return the distance from O to the intersection of the ray (camera, direction) with the 
     # sphere (C_sphere, R_sphere), or +inf if there is no intersection.
-    # O and S are 3D points, dir (direction) is a normalized vector, R is a scalar.
-    a = np.dot(dir, dir) #dot product of dir with itself, basically we get its magnitude
-    OC = camera - C_sphere 
-    b = 2 * np.dot(dir, OC)
-    c = np.dot(OC, OC) - R_sphere * R_sphere
-    disc = b * b - 4 * a * c
-    if disc > 0:
-        distSqrt = np.sqrt(disc)
-        q = (-b - distSqrt) / 2.0 if b < 0 else (-b + distSqrt) / 2.0
-        t0 = q / a
-        t1 = c / q
-        t0, t1 = min(t0, t1), max(t0, t1)
-        if t1 >= 0:
-            return t1 if t0 < 0 else t0
-    return np.inf #returning infinity incase there is no point of intersection
-
+    # O and S are 3D points, direction (direction) is a normalized vector, R is a scalar.
+    
+    radius2 = R_sphere * R_sphere
+    l = C_sphere - camera
+    tca = np.dot(l , direction)
+    if tca>0:
+      distance2 = np.dot(l,l) - tca * tca
+      if radius2<distance2:
+        return np.inf
+      thc = np.sqrt(radius2-distance2)
+      t0 , t1 = min(tca-thc , tca + thc) , max(tca-thc , tca + thc)
+      if t1 >= 0 :
+        return t1 if t0 < 0 else t0
+    return np.inf
+       
 
 def intersect(camera, ray_dir, obj):
     """A function to segregate between intersection of the ray with our plane or with our image"""
@@ -264,9 +263,9 @@ def main(color):
         for j, y in enumerate(np.linspace(screen_coordinates[1], screen_coordinates[3], height)):
             color[:] = 0
             Q[:2] = (x, y)
-            D = normalize(Q - O)
+            D = normalize(Q - camera)
             depth = 0
-            rayO, rayD = O, D
+            rayO, rayD = camera, D
             reflection = 1.
             # Loop through initial and secondary rays.
             while depth < depth_max:
