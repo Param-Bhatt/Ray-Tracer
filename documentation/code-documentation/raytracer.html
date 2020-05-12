@@ -47,7 +47,9 @@ import matplotlib.pyplot as plt
 &#34;&#34;&#34;Here we have defined the variables for the width and height of our viewing window , can change it accordingly&#34;&#34;&#34;
 
 w = 1280
+&#34;&#34;&#34;Defining the width size of our window&#34;&#34;&#34;
 h = 720
+&#34;&#34;&#34;Defining the height of our window &#34;&#34;&#34;
 
 
 def normalize(x):
@@ -237,19 +239,17 @@ scene = [add_sphere([.75, .1, 1.], .6, [0., 0., 1.]),
          add_sphere([-2.75, .1, 3.5], .6, [1., .572, .184]),
          add_plane([0., -.5, 0.], [0., 1., 0.]),
     ]
-
-&#34;&#34;&#34;We start of with light positioned at (5,5,-10). Z-coordinate is negative , hence the light point is &lt;u&gt;behind us into the screen&lt;/u&gt;. The color is initalised to (1,1,1) which is white. &lt;br&gt;
+&#34;&#34;&#34;The scene includes all of our objects that we are going to draw . Currently , includes 3 spheres and 1 plane. The plane has individual black and white squares , like a chess board . &#34;&#34;&#34;
+&#34;&#34;&#34;
 The default parameters are intialised accordingly.
 &lt;ol&gt;All are initialised to x,y,z coordinates here:
-&lt;li&gt; O is our camera . &lt;/li&gt;
-    &lt;li&gt; Q is the pixel where our camera is pointing at.&lt;/li&gt;
-    &lt;li&gt;We initialise imgage of shape 300*400 here , and each pixel will be a 3d array consisting of all 3 coordiantes.&lt;/li&gt;
 &#34;&#34;&#34;
 
 # Light position and color.
 L = np.array([5., 5., -10.])
+&#34;&#34;&#34;We start of with light positioned at (5,5,-10). Z-coordinate is negative , hence the light point is &lt;u&gt;behind us into the screen&lt;/u&gt;.&#34;&#34;&#34;
 color_light = np.ones(3)
-
+&#34;&#34;&#34; The color is initalised to (1,1,1) which is white. &lt;br&gt;&#34;&#34;&#34;
 # Default light and material parameters.
 ambient = .05
 diffuse_c = 1.
@@ -257,55 +257,64 @@ specular_c = 1.
 specular_k = 50
 
 depth_max = 100  # Maximum number of light reflections.
+&#34;&#34;&#34;Depth max tells us the number of light reflections that we want to allow. &#34;&#34;&#34;
 col = np.zeros(3)  # Current color.
 O = np.array([0., 0.35, -1.])  # Camera.
+&#34;&#34;&#34;&lt;li&gt; O is our camera . &lt;/li&gt;
+&#34;&#34;&#34;
 Q = np.array([0., 0., 0.])  # Camera pointing to.
+&#34;&#34;&#34;    &lt;li&gt; Q is the pixel where our camera is pointing at.&lt;/li&gt;
+&#34;&#34;&#34;
 img = np.zeros((h, w, 3)) # Image window
-
-&#34;&#34;&#34;&lt;li&gt;Aspect ratio : &#39;r&#39; is our aspect ratio .
-&lt;li&gt; We start off from screen coordinates x0,y0,x1,y1 and traverse through the entire screen.
-&lt;li&gt;np.linspace is used for iterating through a lot of values.&lt;i&gt;(For more information , go : &lt;a href=&#34;https://www.geeksforgeeks.org/numpy-linspace-python/&#34;&gt; here&lt;/a&gt;)&lt;/i&gt;. Speaking in layman terms, we iterate through the entire scene, the first loop is for going along width and the nested loop is for going along the height.
-&lt;li&gt;we initialise the entire column arrays to 0 and the first 2 elements of the Q array to x and y co-ordinates.
-&lt;li&gt;D is the unit vector from Q to 0. 
-&lt;li&gt; We are starting with depth 0. The more depth we can keep , the better our resulting image will be. However , it is computationally heavy , so we have kept it at depth 5.
-&lt;li&gt; We set the ray origin to be the graphical origin (0,0,0) and ray direction to be the respective x and y of the particular pixel we are investigating. 
-&lt;li&gt; We have kept reflection to 1 , which means that reflection is there.
-&lt;li&gt; Our function trace_ray returns the object, its intersection point with the current ray , the normal from the center (&lt;i&gt;position&lt;/i&gt;) of our object to the point and the color of the particular pixel.&lt;b&gt;&lt;br&gt;If it does not return anything, it means there is no pixel to be coloured , and hence should be same as the background scene &lt;/b&gt;
-&lt;li&gt;Once traced the ray , we assign those values from the traced data type into our variables here. 
-&lt;li&gt; Now we go towards reflection. Just like in the reflection , we take ray origin and ray direction as M+N*xxx and unit vector in the normal directio respectively.
-&lt;li&gt; We multiply and add the color multiplied with reflection to get a different color accordingly as per the lighting required. Then we store this value in reflection variable for future use.
-&lt;li&gt; Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.
+&#34;&#34;&#34;    &lt;li&gt;We initialise imgage of shape height*width here , and each pixel will be a 3d array consisting of all 3 coordiantes.&lt;/li&gt;
 &#34;&#34;&#34;
 
-r = float(w) / h #we get the aspect ratio as &#39;r&#39;
-# Screen coordinates: x0, y0, x1, y1.
-S = (-1., -1. / r + .25, 1., 1. / r + .25)
+def main():
+    &#34;&#34;&#34;&lt;li&gt;Aspect ratio : &#39;r&#39; is our aspect ratio .
+    &lt;li&gt; We start off from screen coordinates x0,y0,x1,y1 and traverse through the entire screen.
+    &lt;li&gt;np.linspace is used for iterating through a lot of values.&lt;i&gt;(For more information , go : &lt;a href=&#34;https://www.geeksforgeeks.org/numpy-linspace-python/&#34;&gt; here&lt;/a&gt;)&lt;/i&gt;. Speaking in layman terms, we iterate through the entire scene, the first loop is for going along width and the nested loop is for going along the height.
+    &lt;li&gt;we initialise the entire column arrays to 0 and the first 2 elements of the Q array to x and y co-ordinates.
+    &lt;li&gt;D is the unit vector from Q to 0. 
+    &lt;li&gt; We are starting with depth 0. The more depth we can keep , the better our resulting image will be. However , it is computationally heavy , so we have kept it at depth 5.
+    &lt;li&gt; We set the ray origin to be the graphical origin (0,0,0) and ray direction to be the respective x and y of the particular pixel we are investigating. 
+    &lt;li&gt; We have kept reflection to 1 , which means that reflection is there.
+    &lt;li&gt; Our function trace_ray returns the object, its intersection point with the current ray , the normal from the center (&lt;i&gt;position&lt;/i&gt;) of our object to the point and the color of the particular pixel.&lt;b&gt;&lt;br&gt;If it does not return anything, it means there is no pixel to be coloured , and hence should be same as the background scene &lt;/b&gt;
+    &lt;li&gt;Once traced the ray , we assign those values from the traced data type into our variables here. 
+    &lt;li&gt; Now we go towards reflection. Just like in the reflection , we take ray origin and ray direction as M+N*xxx and unit vector in the normal directio respectively.
+    &lt;li&gt; We multiply and add the color multiplied with reflection to get a different color accordingly as per the lighting required. Then we store this value in reflection variable for future use.
+    &lt;li&gt; Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.
+    &#34;&#34;&#34;
 
-# Loop through all pixels.
-for i, x in enumerate(np.linspace(S[0], S[2], w)):
-    for j, y in enumerate(np.linspace(S[1], S[3], h)):
-        col[:] = 0
-        Q[:2] = (x, y)
-        D = normalize(Q - O)
-        depth = 0
-        rayO, rayD = O, D
-        reflection = 1.
-        # Loop through initial and secondary rays.
-        while depth &lt; depth_max:
-            traced = trace_ray(rayO, rayD)
-            if not traced:
-                break
-            obj, M, N, col_ray = traced
-            # Reflection: create a new ray.
-            rayO, rayD = M + N * .0001, normalize(rayD - 2 * np.dot(rayD, N) * N)
-            depth += 1
-            col += reflection * col_ray
-            reflection *= obj.get(&#39;reflection&#39;, 1.)
-        img[h - j - 1, i, :] = np.clip(col, 0, 1)
+    r = float(w) / h #we get the aspect ratio as &#39;r&#39;
+    # Screen coordinates: x0, y0, x1, y1.
+    S = (-1., -1. / r + .25, 1., 1. / r + .25)
 
-&#34;&#34;&#34;Finally showing the image using the image show function of matlplotlib&#34;&#34;&#34;
+    # Loop through all pixels.
+    for i, x in enumerate(np.linspace(S[0], S[2], w)):
+        for j, y in enumerate(np.linspace(S[1], S[3], h)):
+            col[:] = 0
+            Q[:2] = (x, y)
+            D = normalize(Q - O)
+            depth = 0
+            rayO, rayD = O, D
+            reflection = 1.
+            # Loop through initial and secondary rays.
+            while depth &lt; depth_max:
+                traced = trace_ray(rayO, rayD)
+                if not traced:
+                    break
+                obj, M, N, col_ray = traced
+                # Reflection: create a new ray.
+                rayO, rayD = M + N * .0001, normalize(rayD - 2 * np.dot(rayD, N) * N)
+                depth += 1
+                col += reflection * col_ray
+                reflection *= obj.get(&#39;reflection&#39;, 1.)
+            img[h - j - 1, i, :] = np.clip(col, 0, 1)
 
-plt.imshow(img)</code></pre>
+if __name__ == &#34;main&#34;:
+    &#34;&#34;&#34;Finally showing the image using the image show function of matlplotlib&#34;&#34;&#34;
+    main()
+    plt.imshow(img)</code></pre>
 </details>
 </section>
 <section>
@@ -313,30 +322,41 @@ plt.imshow(img)</code></pre>
 <section>
 <h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
+<dt id="raytracer.L"><code class="name">var <span class="ident">L</span></code></dt>
+<dd>
+<div class="desc"><p>We start of with light positioned at (5,5,-10). Z-coordinate is negative , hence the light point is <u>behind us into the screen</u>.</p></div>
+</dd>
+<dt id="raytracer.O"><code class="name">var <span class="ident">O</span></code></dt>
+<dd>
+<div class="desc"><li> O is our camera . </li></div>
+</dd>
+<dt id="raytracer.Q"><code class="name">var <span class="ident">Q</span></code></dt>
+<dd>
+<div class="desc"><li> Q is the pixel where our camera is pointing at.</li></div>
+</dd>
+<dt id="raytracer.color_light"><code class="name">var <span class="ident">color_light</span></code></dt>
+<dd>
+<div class="desc"><p>The color is initalised to (1,1,1) which is white. <br></p></div>
+</dd>
+<dt id="raytracer.depth_max"><code class="name">var <span class="ident">depth_max</span></code></dt>
+<dd>
+<div class="desc"><p>Depth max tells us the number of light reflections that we want to allow.</p></div>
+</dd>
+<dt id="raytracer.h"><code class="name">var <span class="ident">h</span></code></dt>
+<dd>
+<div class="desc"><p>Defining the height of our window</p></div>
+</dd>
 <dt id="raytracer.img"><code class="name">var <span class="ident">img</span></code></dt>
 <dd>
-<div class="desc"><li>Aspect ratio : 'r' is our aspect ratio .
-<li> We start off from screen coordinates x0,y0,x1,y1 and traverse through the entire screen.
-<li>np.linspace is used for iterating through a lot of values.<i>(For more information , go : <a href="https://www.geeksforgeeks.org/numpy-linspace-python/"> here</a>)</i>. Speaking in layman terms, we iterate through the entire scene, the first loop is for going along width and the nested loop is for going along the height.
-<li>we initialise the entire column arrays to 0 and the first 2 elements of the Q array to x and y co-ordinates.
-<li>D is the unit vector from Q to 0.
-<li> We are starting with depth 0. The more depth we can keep , the better our resulting image will be. However , it is computationally heavy , so we have kept it at depth 5.
-<li> We set the ray origin to be the graphical origin (0,0,0) and ray direction to be the respective x and y of the particular pixel we are investigating.
-<li> We have kept reflection to 1 , which means that reflection is there.
-<li> Our function trace_ray returns the object, its intersection point with the current ray , the normal from the center (<i>position</i>) of our object to the point and the color of the particular pixel.<b><br>If it does not return anything, it means there is no pixel to be coloured , and hence should be same as the background scene </b>
-<li>Once traced the ray , we assign those values from the traced data type into our variables here.
-<li> Now we go towards reflection. Just like in the reflection , we take ray origin and ray direction as M+N*xxx and unit vector in the normal directio respectively.
-<li> We multiply and add the color multiplied with reflection to get a different color accordingly as per the lighting required. Then we store this value in reflection variable for future use.
-<li> Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.</div>
+<div class="desc"><li>We initialise imgage of shape height*width here , and each pixel will be a 3d array consisting of all 3 coordiantes.</li></div>
 </dd>
 <dt id="raytracer.scene"><code class="name">var <span class="ident">scene</span></code></dt>
 <dd>
-<div class="desc"><p>We start of with light positioned at (5,5,-10). Z-coordinate is negative , hence the light point is <u>behind us into the screen</u>. The color is initalised to (1,1,1) which is white. <br>
-The default parameters are intialised accordingly.
-<ol>All are initialised to x,y,z coordinates here:
-<li> O is our camera . </li>
-<li> Q is the pixel where our camera is pointing at.</li>
-<li>We initialise imgage of shape 300*400 here , and each pixel will be a 3d array consisting of all 3 coordiantes.</li></p></div>
+<div class="desc"><p>The scene includes all of our objects that we are going to draw . Currently , includes 3 spheres and 1 plane. The plane has individual black and white squares , like a chess board .</p></div>
+</dd>
+<dt id="raytracer.w"><code class="name">var <span class="ident">w</span></code></dt>
+<dd>
+<div class="desc"><p>Defining the width size of our window</p></div>
 </dd>
 </dl>
 </section>
@@ -555,6 +575,70 @@ This function gives us 2 points of intersection of the ray with our sphere
     return np.inf #returning infinity incase there is no point of intersection</code></pre>
 </details>
 </dd>
+<dt id="raytracer.main"><code class="name flex">
+<span>def <span class="ident">main</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><li>Aspect ratio : 'r' is our aspect ratio .
+<li> We start off from screen coordinates x0,y0,x1,y1 and traverse through the entire screen.
+<li>np.linspace is used for iterating through a lot of values.<i>(For more information , go : <a href="https://www.geeksforgeeks.org/numpy-linspace-python/"> here</a>)</i>. Speaking in layman terms, we iterate through the entire scene, the first loop is for going along width and the nested loop is for going along the height.
+<li>we initialise the entire column arrays to 0 and the first 2 elements of the Q array to x and y co-ordinates.
+<li>D is the unit vector from Q to 0.
+<li> We are starting with depth 0. The more depth we can keep , the better our resulting image will be. However , it is computationally heavy , so we have kept it at depth 5.
+<li> We set the ray origin to be the graphical origin (0,0,0) and ray direction to be the respective x and y of the particular pixel we are investigating.
+<li> We have kept reflection to 1 , which means that reflection is there.
+<li> Our function trace_ray returns the object, its intersection point with the current ray , the normal from the center (<i>position</i>) of our object to the point and the color of the particular pixel.<b><br>If it does not return anything, it means there is no pixel to be coloured , and hence should be same as the background scene </b>
+<li>Once traced the ray , we assign those values from the traced data type into our variables here.
+<li> Now we go towards reflection. Just like in the reflection , we take ray origin and ray direction as M+N*xxx and unit vector in the normal directio respectively.
+<li> We multiply and add the color multiplied with reflection to get a different color accordingly as per the lighting required. Then we store this value in reflection variable for future use.
+<li> Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.</div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def main():
+    &#34;&#34;&#34;&lt;li&gt;Aspect ratio : &#39;r&#39; is our aspect ratio .
+    &lt;li&gt; We start off from screen coordinates x0,y0,x1,y1 and traverse through the entire screen.
+    &lt;li&gt;np.linspace is used for iterating through a lot of values.&lt;i&gt;(For more information , go : &lt;a href=&#34;https://www.geeksforgeeks.org/numpy-linspace-python/&#34;&gt; here&lt;/a&gt;)&lt;/i&gt;. Speaking in layman terms, we iterate through the entire scene, the first loop is for going along width and the nested loop is for going along the height.
+    &lt;li&gt;we initialise the entire column arrays to 0 and the first 2 elements of the Q array to x and y co-ordinates.
+    &lt;li&gt;D is the unit vector from Q to 0. 
+    &lt;li&gt; We are starting with depth 0. The more depth we can keep , the better our resulting image will be. However , it is computationally heavy , so we have kept it at depth 5.
+    &lt;li&gt; We set the ray origin to be the graphical origin (0,0,0) and ray direction to be the respective x and y of the particular pixel we are investigating. 
+    &lt;li&gt; We have kept reflection to 1 , which means that reflection is there.
+    &lt;li&gt; Our function trace_ray returns the object, its intersection point with the current ray , the normal from the center (&lt;i&gt;position&lt;/i&gt;) of our object to the point and the color of the particular pixel.&lt;b&gt;&lt;br&gt;If it does not return anything, it means there is no pixel to be coloured , and hence should be same as the background scene &lt;/b&gt;
+    &lt;li&gt;Once traced the ray , we assign those values from the traced data type into our variables here. 
+    &lt;li&gt; Now we go towards reflection. Just like in the reflection , we take ray origin and ray direction as M+N*xxx and unit vector in the normal directio respectively.
+    &lt;li&gt; We multiply and add the color multiplied with reflection to get a different color accordingly as per the lighting required. Then we store this value in reflection variable for future use.
+    &lt;li&gt; Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.
+    &#34;&#34;&#34;
+
+    r = float(w) / h #we get the aspect ratio as &#39;r&#39;
+    # Screen coordinates: x0, y0, x1, y1.
+    S = (-1., -1. / r + .25, 1., 1. / r + .25)
+
+    # Loop through all pixels.
+    for i, x in enumerate(np.linspace(S[0], S[2], w)):
+        for j, y in enumerate(np.linspace(S[1], S[3], h)):
+            col[:] = 0
+            Q[:2] = (x, y)
+            D = normalize(Q - O)
+            depth = 0
+            rayO, rayD = O, D
+            reflection = 1.
+            # Loop through initial and secondary rays.
+            while depth &lt; depth_max:
+                traced = trace_ray(rayO, rayD)
+                if not traced:
+                    break
+                obj, M, N, col_ray = traced
+                # Reflection: create a new ray.
+                rayO, rayD = M + N * .0001, normalize(rayD - 2 * np.dot(rayD, N) * N)
+                depth += 1
+                col += reflection * col_ray
+                reflection *= obj.get(&#39;reflection&#39;, 1.)
+            img[h - j - 1, i, :] = np.clip(col, 0, 1)</code></pre>
+</details>
+</dd>
 <dt id="raytracer.normalize"><code class="name flex">
 <span>def <span class="ident">normalize</span></span>(<span>x)</span>
 </code></dt>
@@ -674,9 +758,16 @@ This function gives us 2 points of intersection of the ray with our sphere
 </div>
 <ul id="index">
 <li><h3><a href="#header-variables">Global variables</a></h3>
-<ul class="">
+<ul class="two-column">
+<li><code><a title="raytracer.L" href="#raytracer.L">L</a></code></li>
+<li><code><a title="raytracer.O" href="#raytracer.O">O</a></code></li>
+<li><code><a title="raytracer.Q" href="#raytracer.Q">Q</a></code></li>
+<li><code><a title="raytracer.color_light" href="#raytracer.color_light">color_light</a></code></li>
+<li><code><a title="raytracer.depth_max" href="#raytracer.depth_max">depth_max</a></code></li>
+<li><code><a title="raytracer.h" href="#raytracer.h">h</a></code></li>
 <li><code><a title="raytracer.img" href="#raytracer.img">img</a></code></li>
 <li><code><a title="raytracer.scene" href="#raytracer.scene">scene</a></code></li>
+<li><code><a title="raytracer.w" href="#raytracer.w">w</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
@@ -688,6 +779,7 @@ This function gives us 2 points of intersection of the ray with our sphere
 <li><code><a title="raytracer.intersect" href="#raytracer.intersect">intersect</a></code></li>
 <li><code><a title="raytracer.intersect_plane" href="#raytracer.intersect_plane">intersect_plane</a></code></li>
 <li><code><a title="raytracer.intersect_sphere" href="#raytracer.intersect_sphere">intersect_sphere</a></code></li>
+<li><code><a title="raytracer.main" href="#raytracer.main">main</a></code></li>
 <li><code><a title="raytracer.normalize" href="#raytracer.normalize">normalize</a></code></li>
 <li><code><a title="raytracer.trace_ray" href="#raytracer.trace_ray">trace_ray</a></code></li>
 </ul>

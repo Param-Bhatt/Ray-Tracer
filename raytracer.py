@@ -17,7 +17,9 @@ import matplotlib.pyplot as plt
 """Here we have defined the variables for the width and height of our viewing window , can change it accordingly"""
 
 w = 1280
+"""Defining the width size of our window"""
 h = 720
+"""Defining the height of our window """
 
 
 def normalize(x):
@@ -207,19 +209,17 @@ scene = [add_sphere([.75, .1, 1.], .6, [0., 0., 1.]),
          add_sphere([-2.75, .1, 3.5], .6, [1., .572, .184]),
          add_plane([0., -.5, 0.], [0., 1., 0.]),
     ]
-
-"""We start of with light positioned at (5,5,-10). Z-coordinate is negative , hence the light point is <u>behind us into the screen</u>. The color is initalised to (1,1,1) which is white. <br>
+"""The scene includes all of our objects that we are going to draw . Currently , includes 3 spheres and 1 plane. The plane has individual black and white squares , like a chess board . """
+"""
 The default parameters are intialised accordingly.
 <ol>All are initialised to x,y,z coordinates here:
-<li> O is our camera . </li>
-    <li> Q is the pixel where our camera is pointing at.</li>
-    <li>We initialise imgage of shape 300*400 here , and each pixel will be a 3d array consisting of all 3 coordiantes.</li>
 """
 
 # Light position and color.
 L = np.array([5., 5., -10.])
+"""We start of with light positioned at (5,5,-10). Z-coordinate is negative , hence the light point is <u>behind us into the screen</u>."""
 color_light = np.ones(3)
-
+""" The color is initalised to (1,1,1) which is white. <br>"""
 # Default light and material parameters.
 ambient = .05
 diffuse_c = 1.
@@ -227,52 +227,61 @@ specular_c = 1.
 specular_k = 50
 
 depth_max = 100  # Maximum number of light reflections.
+"""Depth max tells us the number of light reflections that we want to allow. """
 col = np.zeros(3)  # Current color.
 O = np.array([0., 0.35, -1.])  # Camera.
+"""<li> O is our camera . </li>
+"""
 Q = np.array([0., 0., 0.])  # Camera pointing to.
+"""    <li> Q is the pixel where our camera is pointing at.</li>
+"""
 img = np.zeros((h, w, 3)) # Image window
-
-"""<li>Aspect ratio : 'r' is our aspect ratio .
-<li> We start off from screen coordinates x0,y0,x1,y1 and traverse through the entire screen.
-<li>np.linspace is used for iterating through a lot of values.<i>(For more information , go : <a href="https://www.geeksforgeeks.org/numpy-linspace-python/"> here</a>)</i>. Speaking in layman terms, we iterate through the entire scene, the first loop is for going along width and the nested loop is for going along the height.
-<li>we initialise the entire column arrays to 0 and the first 2 elements of the Q array to x and y co-ordinates.
-<li>D is the unit vector from Q to 0. 
-<li> We are starting with depth 0. The more depth we can keep , the better our resulting image will be. However , it is computationally heavy , so we have kept it at depth 5.
-<li> We set the ray origin to be the graphical origin (0,0,0) and ray direction to be the respective x and y of the particular pixel we are investigating. 
-<li> We have kept reflection to 1 , which means that reflection is there.
-<li> Our function trace_ray returns the object, its intersection point with the current ray , the normal from the center (<i>position</i>) of our object to the point and the color of the particular pixel.<b><br>If it does not return anything, it means there is no pixel to be coloured , and hence should be same as the background scene </b>
-<li>Once traced the ray , we assign those values from the traced data type into our variables here. 
-<li> Now we go towards reflection. Just like in the reflection , we take ray origin and ray direction as M+N*xxx and unit vector in the normal directio respectively.
-<li> We multiply and add the color multiplied with reflection to get a different color accordingly as per the lighting required. Then we store this value in reflection variable for future use.
-<li> Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.
+"""    <li>We initialise imgage of shape height*width here , and each pixel will be a 3d array consisting of all 3 coordiantes.</li>
 """
 
-r = float(w) / h #we get the aspect ratio as 'r'
-# Screen coordinates: x0, y0, x1, y1.
-S = (-1., -1. / r + .25, 1., 1. / r + .25)
+def main():
+    """<li>Aspect ratio : 'r' is our aspect ratio .
+    <li> We start off from screen coordinates x0,y0,x1,y1 and traverse through the entire screen.
+    <li>np.linspace is used for iterating through a lot of values.<i>(For more information , go : <a href="https://www.geeksforgeeks.org/numpy-linspace-python/"> here</a>)</i>. Speaking in layman terms, we iterate through the entire scene, the first loop is for going along width and the nested loop is for going along the height.
+    <li>we initialise the entire column arrays to 0 and the first 2 elements of the Q array to x and y co-ordinates.
+    <li>D is the unit vector from Q to 0. 
+    <li> We are starting with depth 0. The more depth we can keep , the better our resulting image will be. However , it is computationally heavy , so we have kept it at depth 5.
+    <li> We set the ray origin to be the graphical origin (0,0,0) and ray direction to be the respective x and y of the particular pixel we are investigating. 
+    <li> We have kept reflection to 1 , which means that reflection is there.
+    <li> Our function trace_ray returns the object, its intersection point with the current ray , the normal from the center (<i>position</i>) of our object to the point and the color of the particular pixel.<b><br>If it does not return anything, it means there is no pixel to be coloured , and hence should be same as the background scene </b>
+    <li>Once traced the ray , we assign those values from the traced data type into our variables here. 
+    <li> Now we go towards reflection. Just like in the reflection , we take ray origin and ray direction as M+N*xxx and unit vector in the normal directio respectively.
+    <li> We multiply and add the color multiplied with reflection to get a different color accordingly as per the lighting required. Then we store this value in reflection variable for future use.
+    <li> Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.
+    """
 
-# Loop through all pixels.
-for i, x in enumerate(np.linspace(S[0], S[2], w)):
-    for j, y in enumerate(np.linspace(S[1], S[3], h)):
-        col[:] = 0
-        Q[:2] = (x, y)
-        D = normalize(Q - O)
-        depth = 0
-        rayO, rayD = O, D
-        reflection = 1.
-        # Loop through initial and secondary rays.
-        while depth < depth_max:
-            traced = trace_ray(rayO, rayD)
-            if not traced:
-                break
-            obj, M, N, col_ray = traced
-            # Reflection: create a new ray.
-            rayO, rayD = M + N * .0001, normalize(rayD - 2 * np.dot(rayD, N) * N)
-            depth += 1
-            col += reflection * col_ray
-            reflection *= obj.get('reflection', 1.)
-        img[h - j - 1, i, :] = np.clip(col, 0, 1)
+    r = float(w) / h #we get the aspect ratio as 'r'
+    # Screen coordinates: x0, y0, x1, y1.
+    S = (-1., -1. / r + .25, 1., 1. / r + .25)
 
-"""Finally showing the image using the image show function of matlplotlib"""
+    # Loop through all pixels.
+    for i, x in enumerate(np.linspace(S[0], S[2], w)):
+        for j, y in enumerate(np.linspace(S[1], S[3], h)):
+            col[:] = 0
+            Q[:2] = (x, y)
+            D = normalize(Q - O)
+            depth = 0
+            rayO, rayD = O, D
+            reflection = 1.
+            # Loop through initial and secondary rays.
+            while depth < depth_max:
+                traced = trace_ray(rayO, rayD)
+                if not traced:
+                    break
+                obj, M, N, col_ray = traced
+                # Reflection: create a new ray.
+                rayO, rayD = M + N * .0001, normalize(rayD - 2 * np.dot(rayD, N) * N)
+                depth += 1
+                col += reflection * col_ray
+                reflection *= obj.get('reflection', 1.)
+            img[h - j - 1, i, :] = np.clip(col, 0, 1)
 
-plt.imshow(img)
+if __name__ == "main":
+    """Finally showing the image using the image show function of matlplotlib"""
+    main()
+    plt.imshow(img)
