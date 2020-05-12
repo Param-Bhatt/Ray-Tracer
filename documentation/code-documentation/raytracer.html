@@ -46,52 +46,52 @@ import matplotlib.pyplot as plt
 
 &#34;&#34;&#34;Here we have defined the variables for the width and height of our viewing window , can change it accordingly&#34;&#34;&#34;
 
-w = 1280
+width = 400
 &#34;&#34;&#34;Defining the width size of our window&#34;&#34;&#34;
-h = 720
+height = 300
 &#34;&#34;&#34;Defining the height of our window &#34;&#34;&#34;
 
 
-def normalize(x):
+def normalize(vector):
     &#34;&#34;&#34;The normalize function of numpy is used to get the unit vector of the vector that we supply to it as an argument , here x.&#34;&#34;&#34;
 
-    x /= np.linalg.norm(x)
-    return x
+    vector /= np.linalg.norm(vector)
+    return vector
 
-def intersect_plane(O, D, P, N):
+def intersect_plane(camera, dir, P_plane, N_plane):
     &#34;&#34;&#34;&lt;li&gt; O is our camera&lt;/li&gt;
 &lt;li&gt; Q is the pixel at which our camera is pointing &lt;/li&gt;
-&lt;li&gt; N is our normal vector of the plane&lt;/li&gt;
-&lt;li&gt; D is our point of intersection with the plane. Hence OD will be ray directon here. &lt;/li&gt;
-&lt;li&gt; P is our random point on the plane. The plane will be represented as P,N &lt;/li&gt;
+&lt;li&gt; N_plane is our normal vector of the plane&lt;/li&gt;
+&lt;li&gt; dir is our point of intersection with the plane. Hence OD will be ray directon here. &lt;/li&gt;
+&lt;li&gt; P_plane is our random point on the plane. The plane will be represented as P,N &lt;/li&gt;
 &#34;&#34;&#34;
     # Return the distance from O to the intersection of the ray (O, D) with the 
-    # plane (P, N), or +inf if there is no intersection.
-    # O and P are 3D points, D and N (normal) are normalized vectors.
-    denom = np.dot(D, N)
+    # plane (P_plane, N_plane), or +inf if there is no intersection.
+    # camera and P_plane are 3D points, dir and N_plane (normal) are normalized vectors.
+    denom = np.dot(dir, N_plane)
     if np.abs(denom) &lt; 1e-6:
         return np.inf
-    d = np.dot(P - O, N) / denom
+    d = np.dot(P_plane - camera, N_plane) / denom
     if d &lt; 0:
         return np.inf
     return d
 
 
-def intersect_sphere(O, D, S, R):
-    &#34;&#34;&#34;&lt;li&gt;O is our camera (&lt;i&gt;Its a point&lt;/i&gt;)&lt;/li&gt;
-&lt;li&gt;D is the intersection point of the ray and sphere&lt;/li&gt;
-&lt;li&gt;S is center of sphere&lt;/li&gt;
-&lt;li&gt;R is is the radius of the sphere&lt;/li&gt;
+def intersect_sphere(camera, dir, C_sphere, R_sphere):
+    &#34;&#34;&#34;&lt;li&gt;camera is our camera (&lt;i&gt;Its a point&lt;/i&gt;)&lt;/li&gt;
+&lt;li&gt;dir is the intersection point of the ray and sphere&lt;/li&gt;
+&lt;li&gt;C_sphere is center of sphere&lt;/li&gt;
+&lt;li&gt;R_sphere is is the radius of the sphere&lt;/li&gt;
 
 This function gives us 2 points of intersection of the ray with our sphere
 &#34;&#34;&#34;
-# Return the distance from O to the intersection of the ray (O, D) with the 
-    # sphere (S, R), or +inf if there is no intersection.
-    # O and S are 3D points, D (direction) is a normalized vector, R is a scalar.
-    a = np.dot(D, D) #dot product of D with itself, basically we get its magnitude
-    OS = O - S 
-    b = 2 * np.dot(D, OS)
-    c = np.dot(OS, OS) - R * R
+# Return the distance from O to the intersection of the ray (camera, dir) with the 
+    # sphere (C_sphere, R_sphere), or +inf if there is no intersection.
+    # O and S are 3D points, dir (direction) is a normalized vector, R is a scalar.
+    a = np.dot(dir, dir) #dot product of dir with itself, basically we get its magnitude
+    OC = camera - C_sphere 
+    b = 2 * np.dot(dir, OC)
+    c = np.dot(OC, OC) - R_sphere * R_sphere
     disc = b * b - 4 * a * c
     if disc &gt; 0:
         distSqrt = np.sqrt(disc)
@@ -104,43 +104,43 @@ This function gives us 2 points of intersection of the ray with our sphere
     return np.inf #returning infinity incase there is no point of intersection
 
 
-def intersect(O, D, obj):
+def intersect(camera, ray_dir, obj):
     &#34;&#34;&#34;A function to segregate between intersection of the ray with our plane or with our image&#34;&#34;&#34;
     if obj[&#39;type&#39;] == &#39;plane&#39;:
-        return intersect_plane(O, D, obj[&#39;position&#39;], obj[&#39;normal&#39;])
+        return intersect_plane(camera, ray_dir, obj[&#39;position&#39;], obj[&#39;normal&#39;])
     elif obj[&#39;type&#39;] == &#39;sphere&#39;:
-        return intersect_sphere(O, D, obj[&#39;position&#39;], obj[&#39;radius&#39;])
-def get_normal(obj, M):
+        return intersect_sphere(camera, ray_dir, obj[&#39;position&#39;], obj[&#39;radius&#39;])
+def get_normal(obj, intrsct):
     
     &#34;&#34;&#34;We love playing with normals here, hence this function is just for finding the unit normal of any given object.&lt;br&gt; We first check for the type of object from the object dictionary. 
     &lt;li&gt;Since we stored the normal of the plane with the object itself, we can straight away give the normal to the plane.&lt;/li&gt;
     &lt;li&gt;For sphere we normalise the ray from M to the center of our sphere , which then becomes our normal.
     &lt;/li&gt;
-    &lt;li&gt;M here is M = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays
+    &lt;li&gt;intrsct here is intrsct = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays
     &lt;/li&gt;
     &lt;li&gt;N returned here is the unit normal of that respective object&lt;/li&gt;
     &#34;&#34;&#34;
 
 # Find normal.
     if obj[&#39;type&#39;] == &#39;sphere&#39;:
-        N = normalize(M - obj[&#39;position&#39;])
+        N = normalize(intrsct - obj[&#39;position&#39;])
     elif obj[&#39;type&#39;] == &#39;plane&#39;:
         N = obj[&#39;normal&#39;]
     return N
 
-def get_color(obj, M):
+def get_color(obj, intrsct):
     &#34;&#34;&#34;This function is used for choosing the color and making any changes to it whatsoever required. Based on the object , we assign it the colour.
-    &lt;li&gt;M here is M = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays.
+    &lt;li&gt;intrsct here is intrsct = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays.
     &lt;/li&gt;
     &lt;li&gt; Color returned is the color of the object in question , and this is what we will paint it with . &lt;/li&gt;
     &#34;&#34;&#34;
 
     color = obj[&#39;color&#39;]
     if not hasattr(color, &#39;__len__&#39;):
-        color = color(M)
+        color = color(intrsct)
     return color
 
-def trace_ray(rayO, rayD):
+def trace_ray(rayOrigin, rayDirection):
     &#34;&#34;&#34;&lt;h3&gt;The function arguments&lt;/h3&gt;
     &lt;li&gt;rayO is the ray origin . This will be the starting point of our ray from which we will make the ray&lt;/li&gt;
     &lt;li&gt;rayD is the ray direction. From the ray origin, the ray will pass through the center of the pixel that we will be looking at. The ray in this direction will be labelled as rayD&lt;/li&gt;
@@ -151,7 +151,7 @@ def trace_ray(rayO, rayD):
     &lt;li&gt;The line &#34;obj = scene[obj_idx]&#34; means that we take the object. the object index will tell us which one it is , in this case , whether its sphere#1,#2,#3 or the plane. We store this value in obj.
     &lt;li&gt;To traverse through the intersection point, we start at ray origin, and then traverse t distance ( t is the intersection point ) in ray dir. Its a scalar*vector multiplication .
     &lt;li&gt;Then we get the properties of object , namely , it&#39;s normal to the intersection point and it&#39;s color.
-    &lt;li&gt;toL and toO are our normalised vectors. toL is the vector from M to L (&lt;i&gt;L is our light source ki position)&lt;/i&gt;. toO is the vector from M to O &lt;i&gt;(O is the position of our camera)&lt;/i&gt;
+    &lt;li&gt;shadow_raydir and toO are our normalised vectors. shadow_raydir is the vector from M to L (&lt;i&gt;L is our light source ki position)&lt;/i&gt;. toO is the vector from M to O &lt;i&gt;(O is the position of our camera)&lt;/i&gt;
     &lt;h3&gt;Game of Shadows&lt;/h3&gt;
     &lt;li&gt;This time , we start moving from M. This will be our reflected ray , so this time our ray origin becomes M. However , to avoid code being messy and all , we carry on with M as our new ray origin.
     &lt;li&gt; Since N is the normal , this is our new ray dir. Why is it so? Coz after light hits a point , it is always going to be reflected in the direction of the normal from the center to the point of intersection, the 90degree angle change will happen. We are ignoring diffused reflection here , only normal reflection is being considered.
@@ -159,18 +159,18 @@ def trace_ray(rayO, rayD):
     &lt;li&gt;Coloring time....yaay 
     &lt;br&gt;Default light and material parameters.&lt;br&gt;
     &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp ambient = .05&lt;br&gt;
-    &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp diffuse_c = 1.&lt;br&gt;
-    &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp specular_c = 1.&lt;br&gt;
+    &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp diffuse_coeff = 1.&lt;br&gt;
+    &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp specular_coeff = 1.&lt;br&gt;
     &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp specular_k = 50&lt;br&gt;
     &lt;li&gt; Ambient variable sets the colour of the ray of light that is going to pass from our light source.
-    &lt;li&gt;Diffuse_c is the variable that comes into picture for diffuse coloring. This is because when a light hits an object , it cant be lighted the same way for all the points of the object , as different light rays will hit them. Hence this is used for changing the diffusing accordingly.
+    &lt;li&gt;diffuse_coeff is the variable that comes into picture for diffuse coloring. This is because when a light hits an object , it cant be lighted the same way for all the points of the object , as different light rays will hit them. Hence this is used for changing the diffusing accordingly.
     &lt;li&gt;specular colouring is used for showing the light where intensity is so high that it is seen by us as the source of the light itself.
     &#34;&#34;&#34;
 
     # Find first point of intersection with the scene.
     t = np.inf
     for i, obj in enumerate(scene):
-        t_obj = intersect(rayO, rayD, obj)
+        t_obj = intersect(rayOrigin, rayDirection, obj)
         if t_obj &lt; t:
             t, obj_idx = t_obj, i
     # Return None if the ray does not intersect any object.
@@ -179,24 +179,24 @@ def trace_ray(rayO, rayD):
     # Find the object.
     obj = scene[obj_idx]
     # Find the point of intersection on the object.
-    M = rayO + rayD * t #traverse to the intersection points
+    intrsct = rayOrigin + rayDirection * t #traverse to the intersection points
     # Find properties of the object.
-    N = get_normal(obj, M)
-    color = get_color(obj, M)
-    toL = normalize(L - M)
-    toO = normalize(O - M)
+    N = get_normal(obj, intrsct)
+    color = get_color(obj, intrsct)
+    shadow_raydir = normalize(Light_postion - intrsct)
+    toO = normalize(camera - intrsct)
     # Shadow: find if the point is shadowed or not.
-    l = [intersect(M + N * .0001, toL, obj_sh) 
+    l = [intersect(intrsct + N * .0001, shadow_raydir, obj_sh) 
             for k, obj_sh in enumerate(scene) if k != obj_idx]
     if l and min(l) &lt; np.inf:
         return
     # Start computing the color.
     col_ray = ambient
     # Lambert shading (diffuse).
-    col_ray += obj.get(&#39;diffuse_c&#39;, diffuse_c) * max(np.dot(N, toL), 0) * color
+    col_ray += obj.get(&#39;diffuse_coeff&#39;, diffuse_coeff) * max(np.dot(N, shadow_raydir), 0) * color
     # Blinn-Phong shading (specular).
-    col_ray += obj.get(&#39;specular_c&#39;, specular_c) * max(np.dot(N, normalize(toL + toO)), 0) ** specular_k * color_light
-    return obj, M, N, col_ray
+    col_ray += obj.get(&#39;specular_coeff&#39;, specular_coeff) * max(np.dot(N, normalize(shadow_raydir + toO)), 0) ** specular_k * color_light
+    return obj, intrsct, N, col_ray
 
 def add_sphere(position, radius, color):
     &#34;&#34;&#34;The add_sphere function adds a sphere as a dictionary along with its position , radius , color and reflectivity&lt;br&gt;
@@ -225,15 +225,15 @@ def add_plane(position, normal):
     &#34;&#34;&#34;
     return dict(type=&#39;plane&#39;, position=np.array(position), 
         normal=np.array(normal),
-        color=lambda M: (color_plane0 
-            if (int(M[0] * 2) % 2) == (int(M[2] * 2) % 2) else color_plane1),
-        diffuse_c=.75, specular_c=.5, reflection=.25)
+        color=lambda M: (color_plane_white 
+            if (int(M[0] * 2) % 2) == (int(M[2] * 2) % 2) else color_plane_black),
+        diffuse_coeff=.75, specular_coeff=.5, reflection=.25)
 
-&#34;&#34;&#34;We start out by defining our objects. color_plane0 and color_plane1 are 3x1 matrices consisting of 1 and 0 respectively. We then add 3 spheres and a ground to our scene.&#34;&#34;&#34;
+&#34;&#34;&#34;We start out by defining our objects. color_plane_white and color_plane_black are 3x1 matrices consisting of 1 and 0 respectively. We then add 3 spheres and a ground to our scene.&#34;&#34;&#34;
 
 # List of objects.
-color_plane0 = 1. * np.ones(3)
-color_plane1 = 0. * np.ones(3)
+color_plane_white = 1. * np.ones(3)
+color_plane_black = 0. * np.ones(3)
 scene = [add_sphere([.75, .1, 1.], .6, [0., 0., 1.]),
          add_sphere([-.75, .1, 2.25], .6, [.5, .223, .5]),
          add_sphere([-2.75, .1, 3.5], .6, [1., .572, .184]),
@@ -246,30 +246,30 @@ The default parameters are intialised accordingly.
 &#34;&#34;&#34;
 
 # Light position and color.
-L = np.array([5., 5., -10.])
+Light_postion = np.array([5., 5., -10.])
 &#34;&#34;&#34;We start of with light positioned at (5,5,-10). Z-coordinate is negative , hence the light point is &lt;u&gt;behind us into the screen&lt;/u&gt;.&#34;&#34;&#34;
 color_light = np.ones(3)
 &#34;&#34;&#34; The color is initalised to (1,1,1) which is white. &lt;br&gt;&#34;&#34;&#34;
 # Default light and material parameters.
 ambient = .05
-diffuse_c = 1.
-specular_c = 1.
+diffuse_coeff = 1.
+specular_coeff = 1.
 specular_k = 50
 
-depth_max = 100  # Maximum number of light reflections.
+depth_max = 5  # Maximum number of light reflections.
 &#34;&#34;&#34;Depth max tells us the number of light reflections that we want to allow. &#34;&#34;&#34;
-col = np.zeros(3)  # Current color.
-O = np.array([0., 0.35, -1.])  # Camera.
+color = np.zeros(3)  # Current color.
+camera = np.array([0., 0.35, -1.])  # Camera.
 &#34;&#34;&#34;&lt;li&gt; O is our camera . &lt;/li&gt;
 &#34;&#34;&#34;
 Q = np.array([0., 0., 0.])  # Camera pointing to.
 &#34;&#34;&#34;    &lt;li&gt; Q is the pixel where our camera is pointing at.&lt;/li&gt;
 &#34;&#34;&#34;
-img = np.zeros((h, w, 3)) # Image window
+img = np.zeros((height, width, 3)) # Image window
 &#34;&#34;&#34;    &lt;li&gt;We initialise imgage of shape height*width here , and each pixel will be a 3d array consisting of all 3 coordiantes.&lt;/li&gt;
 &#34;&#34;&#34;
 
-def main():
+def main(color):
     &#34;&#34;&#34;&lt;li&gt;Aspect ratio : &#39;r&#39; is our aspect ratio .
     &lt;li&gt; We start off from screen coordinates x0,y0,x1,y1 and traverse through the entire screen.
     &lt;li&gt;np.linspace is used for iterating through a lot of values.&lt;i&gt;(For more information , go : &lt;a href=&#34;https://www.geeksforgeeks.org/numpy-linspace-python/&#34;&gt; here&lt;/a&gt;)&lt;/i&gt;. Speaking in layman terms, we iterate through the entire scene, the first loop is for going along width and the nested loop is for going along the height.
@@ -285,14 +285,14 @@ def main():
     &lt;li&gt; Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.
     &#34;&#34;&#34;
 
-    r = float(w) / h #we get the aspect ratio as &#39;r&#39;
+    r = float(width) / height #we get the aspect ratio as &#39;r&#39;
     # Screen coordinates: x0, y0, x1, y1.
-    S = (-1., -1. / r + .25, 1., 1. / r + .25)
+    screen_coordinates = (-1., -1. / r + .25, 1., 1. / r + .25)
 
     # Loop through all pixels.
-    for i, x in enumerate(np.linspace(S[0], S[2], w)):
-        for j, y in enumerate(np.linspace(S[1], S[3], h)):
-            col[:] = 0
+    for i, x in enumerate(np.linspace(screen_coordinates[0], screen_coordinates[2], width)):
+        for j, y in enumerate(np.linspace(screen_coordinates[1], screen_coordinates[3], height)):
+            color[:] = 0
             Q[:2] = (x, y)
             D = normalize(Q - O)
             depth = 0
@@ -307,14 +307,14 @@ def main():
                 # Reflection: create a new ray.
                 rayO, rayD = M + N * .0001, normalize(rayD - 2 * np.dot(rayD, N) * N)
                 depth += 1
-                col += reflection * col_ray
+                color += reflection * col_ray
                 reflection *= obj.get(&#39;reflection&#39;, 1.)
-            img[h - j - 1, i, :] = np.clip(col, 0, 1)
+            img[height - j - 1, i, :] = np.clip(color, 0, 1)
 
-if __name__ == &#34;main&#34;:
-    &#34;&#34;&#34;Finally showing the image using the image show function of matlplotlib&#34;&#34;&#34;
-    main()
-    plt.imshow(img)</code></pre>
+if __name__ == &#34;__main__&#34;:
+  &#34;&#34;&#34;Finally showing the image using the image show function of matlplotlib&#34;&#34;&#34;
+  main(color)
+  plt.imshow(img)</code></pre>
 </details>
 </section>
 <section>
@@ -322,17 +322,17 @@ if __name__ == &#34;main&#34;:
 <section>
 <h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
-<dt id="raytracer.L"><code class="name">var <span class="ident">L</span></code></dt>
+<dt id="raytracer.Light_postion"><code class="name">var <span class="ident">Light_postion</span></code></dt>
 <dd>
 <div class="desc"><p>We start of with light positioned at (5,5,-10). Z-coordinate is negative , hence the light point is <u>behind us into the screen</u>.</p></div>
-</dd>
-<dt id="raytracer.O"><code class="name">var <span class="ident">O</span></code></dt>
-<dd>
-<div class="desc"><li> O is our camera . </li></div>
 </dd>
 <dt id="raytracer.Q"><code class="name">var <span class="ident">Q</span></code></dt>
 <dd>
 <div class="desc"><li> Q is the pixel where our camera is pointing at.</li></div>
+</dd>
+<dt id="raytracer.camera"><code class="name">var <span class="ident">camera</span></code></dt>
+<dd>
+<div class="desc"><li> O is our camera . </li></div>
 </dd>
 <dt id="raytracer.color_light"><code class="name">var <span class="ident">color_light</span></code></dt>
 <dd>
@@ -342,7 +342,7 @@ if __name__ == &#34;main&#34;:
 <dd>
 <div class="desc"><p>Depth max tells us the number of light reflections that we want to allow.</p></div>
 </dd>
-<dt id="raytracer.h"><code class="name">var <span class="ident">h</span></code></dt>
+<dt id="raytracer.height"><code class="name">var <span class="ident">height</span></code></dt>
 <dd>
 <div class="desc"><p>Defining the height of our window</p></div>
 </dd>
@@ -354,7 +354,7 @@ if __name__ == &#34;main&#34;:
 <dd>
 <div class="desc"><p>The scene includes all of our objects that we are going to draw . Currently , includes 3 spheres and 1 plane. The plane has individual black and white squares , like a chess board .</p></div>
 </dd>
-<dt id="raytracer.w"><code class="name">var <span class="ident">w</span></code></dt>
+<dt id="raytracer.width"><code class="name">var <span class="ident">width</span></code></dt>
 <dd>
 <div class="desc"><p>Defining the width size of our window</p></div>
 </dd>
@@ -393,9 +393,9 @@ if __name__ == &#34;main&#34;:
     &#34;&#34;&#34;
     return dict(type=&#39;plane&#39;, position=np.array(position), 
         normal=np.array(normal),
-        color=lambda M: (color_plane0 
-            if (int(M[0] * 2) % 2) == (int(M[2] * 2) % 2) else color_plane1),
-        diffuse_c=.75, specular_c=.5, reflection=.25)</code></pre>
+        color=lambda M: (color_plane_white 
+            if (int(M[0] * 2) % 2) == (int(M[2] * 2) % 2) else color_plane_black),
+        diffuse_coeff=.75, specular_coeff=.5, reflection=.25)</code></pre>
 </details>
 </dd>
 <dt id="raytracer.add_sphere"><code class="name flex">
@@ -428,66 +428,66 @@ The parameters of each sphere are :
 </details>
 </dd>
 <dt id="raytracer.get_color"><code class="name flex">
-<span>def <span class="ident">get_color</span></span>(<span>obj, M)</span>
+<span>def <span class="ident">get_color</span></span>(<span>obj, intrsct)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This function is used for choosing the color and making any changes to it whatsoever required. Based on the object , we assign it the colour.
-<li>M here is M = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays.
+<li>intrsct here is intrsct = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays.
 </li>
 <li> Color returned is the color of the object in question , and this is what we will paint it with . </li></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_color(obj, M):
+<pre><code class="python">def get_color(obj, intrsct):
     &#34;&#34;&#34;This function is used for choosing the color and making any changes to it whatsoever required. Based on the object , we assign it the colour.
-    &lt;li&gt;M here is M = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays.
+    &lt;li&gt;intrsct here is intrsct = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays.
     &lt;/li&gt;
     &lt;li&gt; Color returned is the color of the object in question , and this is what we will paint it with . &lt;/li&gt;
     &#34;&#34;&#34;
 
     color = obj[&#39;color&#39;]
     if not hasattr(color, &#39;__len__&#39;):
-        color = color(M)
+        color = color(intrsct)
     return color</code></pre>
 </details>
 </dd>
 <dt id="raytracer.get_normal"><code class="name flex">
-<span>def <span class="ident">get_normal</span></span>(<span>obj, M)</span>
+<span>def <span class="ident">get_normal</span></span>(<span>obj, intrsct)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>We love playing with normals here, hence this function is just for finding the unit normal of any given object.<br> We first check for the type of object from the object dictionary.
 <li>Since we stored the normal of the plane with the object itself, we can straight away give the normal to the plane.</li>
 <li>For sphere we normalise the ray from M to the center of our sphere , which then becomes our normal.
 </li>
-<li>M here is M = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays
+<li>intrsct here is intrsct = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays
 </li>
 <li>N returned here is the unit normal of that respective object</li></p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_normal(obj, M):
+<pre><code class="python">def get_normal(obj, intrsct):
     
     &#34;&#34;&#34;We love playing with normals here, hence this function is just for finding the unit normal of any given object.&lt;br&gt; We first check for the type of object from the object dictionary. 
     &lt;li&gt;Since we stored the normal of the plane with the object itself, we can straight away give the normal to the plane.&lt;/li&gt;
     &lt;li&gt;For sphere we normalise the ray from M to the center of our sphere , which then becomes our normal.
     &lt;/li&gt;
-    &lt;li&gt;M here is M = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays
+    &lt;li&gt;intrsct here is intrsct = rayO + rayD * t , the equation we use to traverse across the intersection points of our objects with the rays
     &lt;/li&gt;
     &lt;li&gt;N returned here is the unit normal of that respective object&lt;/li&gt;
     &#34;&#34;&#34;
 
 # Find normal.
     if obj[&#39;type&#39;] == &#39;sphere&#39;:
-        N = normalize(M - obj[&#39;position&#39;])
+        N = normalize(intrsct - obj[&#39;position&#39;])
     elif obj[&#39;type&#39;] == &#39;plane&#39;:
         N = obj[&#39;normal&#39;]
     return N</code></pre>
 </details>
 </dd>
 <dt id="raytracer.intersect"><code class="name flex">
-<span>def <span class="ident">intersect</span></span>(<span>O, D, obj)</span>
+<span>def <span class="ident">intersect</span></span>(<span>camera, ray_dir, obj)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>A function to segregate between intersection of the ray with our plane or with our image</p></div>
@@ -495,74 +495,74 @@ The parameters of each sphere are :
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def intersect(O, D, obj):
+<pre><code class="python">def intersect(camera, ray_dir, obj):
     &#34;&#34;&#34;A function to segregate between intersection of the ray with our plane or with our image&#34;&#34;&#34;
     if obj[&#39;type&#39;] == &#39;plane&#39;:
-        return intersect_plane(O, D, obj[&#39;position&#39;], obj[&#39;normal&#39;])
+        return intersect_plane(camera, ray_dir, obj[&#39;position&#39;], obj[&#39;normal&#39;])
     elif obj[&#39;type&#39;] == &#39;sphere&#39;:
-        return intersect_sphere(O, D, obj[&#39;position&#39;], obj[&#39;radius&#39;])</code></pre>
+        return intersect_sphere(camera, ray_dir, obj[&#39;position&#39;], obj[&#39;radius&#39;])</code></pre>
 </details>
 </dd>
 <dt id="raytracer.intersect_plane"><code class="name flex">
-<span>def <span class="ident">intersect_plane</span></span>(<span>O, D, P, N)</span>
+<span>def <span class="ident">intersect_plane</span></span>(<span>camera, dir, P_plane, N_plane)</span>
 </code></dt>
 <dd>
 <div class="desc"><li> O is our camera</li>
 <li> Q is the pixel at which our camera is pointing </li>
-<li> N is our normal vector of the plane</li>
-<li> D is our point of intersection with the plane. Hence OD will be ray directon here. </li>
-<li> P is our random point on the plane. The plane will be represented as P,N </li></div>
+<li> N_plane is our normal vector of the plane</li>
+<li> dir is our point of intersection with the plane. Hence OD will be ray directon here. </li>
+<li> P_plane is our random point on the plane. The plane will be represented as P,N </li></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def intersect_plane(O, D, P, N):
+<pre><code class="python">def intersect_plane(camera, dir, P_plane, N_plane):
     &#34;&#34;&#34;&lt;li&gt; O is our camera&lt;/li&gt;
 &lt;li&gt; Q is the pixel at which our camera is pointing &lt;/li&gt;
-&lt;li&gt; N is our normal vector of the plane&lt;/li&gt;
-&lt;li&gt; D is our point of intersection with the plane. Hence OD will be ray directon here. &lt;/li&gt;
-&lt;li&gt; P is our random point on the plane. The plane will be represented as P,N &lt;/li&gt;
+&lt;li&gt; N_plane is our normal vector of the plane&lt;/li&gt;
+&lt;li&gt; dir is our point of intersection with the plane. Hence OD will be ray directon here. &lt;/li&gt;
+&lt;li&gt; P_plane is our random point on the plane. The plane will be represented as P,N &lt;/li&gt;
 &#34;&#34;&#34;
     # Return the distance from O to the intersection of the ray (O, D) with the 
-    # plane (P, N), or +inf if there is no intersection.
-    # O and P are 3D points, D and N (normal) are normalized vectors.
-    denom = np.dot(D, N)
+    # plane (P_plane, N_plane), or +inf if there is no intersection.
+    # camera and P_plane are 3D points, dir and N_plane (normal) are normalized vectors.
+    denom = np.dot(dir, N_plane)
     if np.abs(denom) &lt; 1e-6:
         return np.inf
-    d = np.dot(P - O, N) / denom
+    d = np.dot(P_plane - camera, N_plane) / denom
     if d &lt; 0:
         return np.inf
     return d</code></pre>
 </details>
 </dd>
 <dt id="raytracer.intersect_sphere"><code class="name flex">
-<span>def <span class="ident">intersect_sphere</span></span>(<span>O, D, S, R)</span>
+<span>def <span class="ident">intersect_sphere</span></span>(<span>camera, dir, C_sphere, R_sphere)</span>
 </code></dt>
 <dd>
-<div class="desc"><li>O is our camera (<i>Its a point</i>)</li>
-<li>D is the intersection point of the ray and sphere</li>
-<li>S is center of sphere</li>
-<li>R is is the radius of the sphere</li>
+<div class="desc"><li>camera is our camera (<i>Its a point</i>)</li>
+<li>dir is the intersection point of the ray and sphere</li>
+<li>C_sphere is center of sphere</li>
+<li>R_sphere is is the radius of the sphere</li>
 <p>This function gives us 2 points of intersection of the ray with our sphere</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def intersect_sphere(O, D, S, R):
-    &#34;&#34;&#34;&lt;li&gt;O is our camera (&lt;i&gt;Its a point&lt;/i&gt;)&lt;/li&gt;
-&lt;li&gt;D is the intersection point of the ray and sphere&lt;/li&gt;
-&lt;li&gt;S is center of sphere&lt;/li&gt;
-&lt;li&gt;R is is the radius of the sphere&lt;/li&gt;
+<pre><code class="python">def intersect_sphere(camera, dir, C_sphere, R_sphere):
+    &#34;&#34;&#34;&lt;li&gt;camera is our camera (&lt;i&gt;Its a point&lt;/i&gt;)&lt;/li&gt;
+&lt;li&gt;dir is the intersection point of the ray and sphere&lt;/li&gt;
+&lt;li&gt;C_sphere is center of sphere&lt;/li&gt;
+&lt;li&gt;R_sphere is is the radius of the sphere&lt;/li&gt;
 
 This function gives us 2 points of intersection of the ray with our sphere
 &#34;&#34;&#34;
-# Return the distance from O to the intersection of the ray (O, D) with the 
-    # sphere (S, R), or +inf if there is no intersection.
-    # O and S are 3D points, D (direction) is a normalized vector, R is a scalar.
-    a = np.dot(D, D) #dot product of D with itself, basically we get its magnitude
-    OS = O - S 
-    b = 2 * np.dot(D, OS)
-    c = np.dot(OS, OS) - R * R
+# Return the distance from O to the intersection of the ray (camera, dir) with the 
+    # sphere (C_sphere, R_sphere), or +inf if there is no intersection.
+    # O and S are 3D points, dir (direction) is a normalized vector, R is a scalar.
+    a = np.dot(dir, dir) #dot product of dir with itself, basically we get its magnitude
+    OC = camera - C_sphere 
+    b = 2 * np.dot(dir, OC)
+    c = np.dot(OC, OC) - R_sphere * R_sphere
     disc = b * b - 4 * a * c
     if disc &gt; 0:
         distSqrt = np.sqrt(disc)
@@ -576,7 +576,7 @@ This function gives us 2 points of intersection of the ray with our sphere
 </details>
 </dd>
 <dt id="raytracer.main"><code class="name flex">
-<span>def <span class="ident">main</span></span>(<span>)</span>
+<span>def <span class="ident">main</span></span>(<span>color)</span>
 </code></dt>
 <dd>
 <div class="desc"><li>Aspect ratio : 'r' is our aspect ratio .
@@ -596,7 +596,7 @@ This function gives us 2 points of intersection of the ray with our sphere
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def main():
+<pre><code class="python">def main(color):
     &#34;&#34;&#34;&lt;li&gt;Aspect ratio : &#39;r&#39; is our aspect ratio .
     &lt;li&gt; We start off from screen coordinates x0,y0,x1,y1 and traverse through the entire screen.
     &lt;li&gt;np.linspace is used for iterating through a lot of values.&lt;i&gt;(For more information , go : &lt;a href=&#34;https://www.geeksforgeeks.org/numpy-linspace-python/&#34;&gt; here&lt;/a&gt;)&lt;/i&gt;. Speaking in layman terms, we iterate through the entire scene, the first loop is for going along width and the nested loop is for going along the height.
@@ -612,14 +612,14 @@ This function gives us 2 points of intersection of the ray with our sphere
     &lt;li&gt; Finally after all the loops are over , we store the information gathered in image , height-width wise from the col array so that we can later print it out on the screen, or save it as required.
     &#34;&#34;&#34;
 
-    r = float(w) / h #we get the aspect ratio as &#39;r&#39;
+    r = float(width) / height #we get the aspect ratio as &#39;r&#39;
     # Screen coordinates: x0, y0, x1, y1.
-    S = (-1., -1. / r + .25, 1., 1. / r + .25)
+    screen_coordinates = (-1., -1. / r + .25, 1., 1. / r + .25)
 
     # Loop through all pixels.
-    for i, x in enumerate(np.linspace(S[0], S[2], w)):
-        for j, y in enumerate(np.linspace(S[1], S[3], h)):
-            col[:] = 0
+    for i, x in enumerate(np.linspace(screen_coordinates[0], screen_coordinates[2], width)):
+        for j, y in enumerate(np.linspace(screen_coordinates[1], screen_coordinates[3], height)):
+            color[:] = 0
             Q[:2] = (x, y)
             D = normalize(Q - O)
             depth = 0
@@ -634,13 +634,13 @@ This function gives us 2 points of intersection of the ray with our sphere
                 # Reflection: create a new ray.
                 rayO, rayD = M + N * .0001, normalize(rayD - 2 * np.dot(rayD, N) * N)
                 depth += 1
-                col += reflection * col_ray
+                color += reflection * col_ray
                 reflection *= obj.get(&#39;reflection&#39;, 1.)
-            img[h - j - 1, i, :] = np.clip(col, 0, 1)</code></pre>
+            img[height - j - 1, i, :] = np.clip(color, 0, 1)</code></pre>
 </details>
 </dd>
 <dt id="raytracer.normalize"><code class="name flex">
-<span>def <span class="ident">normalize</span></span>(<span>x)</span>
+<span>def <span class="ident">normalize</span></span>(<span>vector)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The normalize function of numpy is used to get the unit vector of the vector that we supply to it as an argument , here x.</p></div>
@@ -648,15 +648,15 @@ This function gives us 2 points of intersection of the ray with our sphere
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def normalize(x):
+<pre><code class="python">def normalize(vector):
     &#34;&#34;&#34;The normalize function of numpy is used to get the unit vector of the vector that we supply to it as an argument , here x.&#34;&#34;&#34;
 
-    x /= np.linalg.norm(x)
-    return x</code></pre>
+    vector /= np.linalg.norm(vector)
+    return vector</code></pre>
 </details>
 </dd>
 <dt id="raytracer.trace_ray"><code class="name flex">
-<span>def <span class="ident">trace_ray</span></span>(<span>rayO, rayD)</span>
+<span>def <span class="ident">trace_ray</span></span>(<span>rayOrigin, rayDirection)</span>
 </code></dt>
 <dd>
 <div class="desc"><h3>The function arguments</h3>
@@ -669,7 +669,7 @@ This function gives us 2 points of intersection of the ray with our sphere
 <li>The line "obj = scene[obj_idx]" means that we take the object. the object index will tell us which one it is , in this case , whether its sphere#1,#2,#3 or the plane. We store this value in obj.
 <li>To traverse through the intersection point, we start at ray origin, and then traverse t distance ( t is the intersection point ) in ray dir. Its a scalar*vector multiplication .
 <li>Then we get the properties of object , namely , it's normal to the intersection point and it's color.
-<li>toL and toO are our normalised vectors. toL is the vector from M to L (<i>L is our light source ki position)</i>. toO is the vector from M to O <i>(O is the position of our camera)</i>
+<li>shadow_raydir and toO are our normalised vectors. shadow_raydir is the vector from M to L (<i>L is our light source ki position)</i>. toO is the vector from M to O <i>(O is the position of our camera)</i>
 <h3>Game of Shadows</h3>
 <li>This time , we start moving from M. This will be our reflected ray , so this time our ray origin becomes M. However , to avoid code being messy and all , we carry on with M as our new ray origin.
 <li> Since N is the normal , this is our new ray dir. Why is it so? Coz after light hits a point , it is always going to be reflected in the direction of the normal from the center to the point of intersection, the 90degree angle change will happen. We are ignoring diffused reflection here , only normal reflection is being considered.
@@ -677,17 +677,17 @@ This function gives us 2 points of intersection of the ray with our sphere
 <li>Coloring time....yaay
 <br>Default light and material parameters.<br>
 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp ambient = .05<br>
-&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp diffuse_c = 1.<br>
-&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp specular_c = 1.<br>
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp diffuse_coeff = 1.<br>
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp specular_coeff = 1.<br>
 &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp specular_k = 50<br>
 <li> Ambient variable sets the colour of the ray of light that is going to pass from our light source.
-<li>Diffuse_c is the variable that comes into picture for diffuse coloring. This is because when a light hits an object , it cant be lighted the same way for all the points of the object , as different light rays will hit them. Hence this is used for changing the diffusing accordingly.
+<li>diffuse_coeff is the variable that comes into picture for diffuse coloring. This is because when a light hits an object , it cant be lighted the same way for all the points of the object , as different light rays will hit them. Hence this is used for changing the diffusing accordingly.
 <li>specular colouring is used for showing the light where intensity is so high that it is seen by us as the source of the light itself.</div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def trace_ray(rayO, rayD):
+<pre><code class="python">def trace_ray(rayOrigin, rayDirection):
     &#34;&#34;&#34;&lt;h3&gt;The function arguments&lt;/h3&gt;
     &lt;li&gt;rayO is the ray origin . This will be the starting point of our ray from which we will make the ray&lt;/li&gt;
     &lt;li&gt;rayD is the ray direction. From the ray origin, the ray will pass through the center of the pixel that we will be looking at. The ray in this direction will be labelled as rayD&lt;/li&gt;
@@ -698,7 +698,7 @@ This function gives us 2 points of intersection of the ray with our sphere
     &lt;li&gt;The line &#34;obj = scene[obj_idx]&#34; means that we take the object. the object index will tell us which one it is , in this case , whether its sphere#1,#2,#3 or the plane. We store this value in obj.
     &lt;li&gt;To traverse through the intersection point, we start at ray origin, and then traverse t distance ( t is the intersection point ) in ray dir. Its a scalar*vector multiplication .
     &lt;li&gt;Then we get the properties of object , namely , it&#39;s normal to the intersection point and it&#39;s color.
-    &lt;li&gt;toL and toO are our normalised vectors. toL is the vector from M to L (&lt;i&gt;L is our light source ki position)&lt;/i&gt;. toO is the vector from M to O &lt;i&gt;(O is the position of our camera)&lt;/i&gt;
+    &lt;li&gt;shadow_raydir and toO are our normalised vectors. shadow_raydir is the vector from M to L (&lt;i&gt;L is our light source ki position)&lt;/i&gt;. toO is the vector from M to O &lt;i&gt;(O is the position of our camera)&lt;/i&gt;
     &lt;h3&gt;Game of Shadows&lt;/h3&gt;
     &lt;li&gt;This time , we start moving from M. This will be our reflected ray , so this time our ray origin becomes M. However , to avoid code being messy and all , we carry on with M as our new ray origin.
     &lt;li&gt; Since N is the normal , this is our new ray dir. Why is it so? Coz after light hits a point , it is always going to be reflected in the direction of the normal from the center to the point of intersection, the 90degree angle change will happen. We are ignoring diffused reflection here , only normal reflection is being considered.
@@ -706,18 +706,18 @@ This function gives us 2 points of intersection of the ray with our sphere
     &lt;li&gt;Coloring time....yaay 
     &lt;br&gt;Default light and material parameters.&lt;br&gt;
     &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp ambient = .05&lt;br&gt;
-    &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp diffuse_c = 1.&lt;br&gt;
-    &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp specular_c = 1.&lt;br&gt;
+    &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp diffuse_coeff = 1.&lt;br&gt;
+    &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp specular_coeff = 1.&lt;br&gt;
     &amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp&amp;nbsp specular_k = 50&lt;br&gt;
     &lt;li&gt; Ambient variable sets the colour of the ray of light that is going to pass from our light source.
-    &lt;li&gt;Diffuse_c is the variable that comes into picture for diffuse coloring. This is because when a light hits an object , it cant be lighted the same way for all the points of the object , as different light rays will hit them. Hence this is used for changing the diffusing accordingly.
+    &lt;li&gt;diffuse_coeff is the variable that comes into picture for diffuse coloring. This is because when a light hits an object , it cant be lighted the same way for all the points of the object , as different light rays will hit them. Hence this is used for changing the diffusing accordingly.
     &lt;li&gt;specular colouring is used for showing the light where intensity is so high that it is seen by us as the source of the light itself.
     &#34;&#34;&#34;
 
     # Find first point of intersection with the scene.
     t = np.inf
     for i, obj in enumerate(scene):
-        t_obj = intersect(rayO, rayD, obj)
+        t_obj = intersect(rayOrigin, rayDirection, obj)
         if t_obj &lt; t:
             t, obj_idx = t_obj, i
     # Return None if the ray does not intersect any object.
@@ -726,24 +726,24 @@ This function gives us 2 points of intersection of the ray with our sphere
     # Find the object.
     obj = scene[obj_idx]
     # Find the point of intersection on the object.
-    M = rayO + rayD * t #traverse to the intersection points
+    intrsct = rayOrigin + rayDirection * t #traverse to the intersection points
     # Find properties of the object.
-    N = get_normal(obj, M)
-    color = get_color(obj, M)
-    toL = normalize(L - M)
-    toO = normalize(O - M)
+    N = get_normal(obj, intrsct)
+    color = get_color(obj, intrsct)
+    shadow_raydir = normalize(Light_postion - intrsct)
+    toO = normalize(camera - intrsct)
     # Shadow: find if the point is shadowed or not.
-    l = [intersect(M + N * .0001, toL, obj_sh) 
+    l = [intersect(intrsct + N * .0001, shadow_raydir, obj_sh) 
             for k, obj_sh in enumerate(scene) if k != obj_idx]
     if l and min(l) &lt; np.inf:
         return
     # Start computing the color.
     col_ray = ambient
     # Lambert shading (diffuse).
-    col_ray += obj.get(&#39;diffuse_c&#39;, diffuse_c) * max(np.dot(N, toL), 0) * color
+    col_ray += obj.get(&#39;diffuse_coeff&#39;, diffuse_coeff) * max(np.dot(N, shadow_raydir), 0) * color
     # Blinn-Phong shading (specular).
-    col_ray += obj.get(&#39;specular_c&#39;, specular_c) * max(np.dot(N, normalize(toL + toO)), 0) ** specular_k * color_light
-    return obj, M, N, col_ray</code></pre>
+    col_ray += obj.get(&#39;specular_coeff&#39;, specular_coeff) * max(np.dot(N, normalize(shadow_raydir + toO)), 0) ** specular_k * color_light
+    return obj, intrsct, N, col_ray</code></pre>
 </details>
 </dd>
 </dl>
@@ -759,15 +759,15 @@ This function gives us 2 points of intersection of the ray with our sphere
 <ul id="index">
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="two-column">
-<li><code><a title="raytracer.L" href="#raytracer.L">L</a></code></li>
-<li><code><a title="raytracer.O" href="#raytracer.O">O</a></code></li>
+<li><code><a title="raytracer.Light_postion" href="#raytracer.Light_postion">Light_postion</a></code></li>
 <li><code><a title="raytracer.Q" href="#raytracer.Q">Q</a></code></li>
+<li><code><a title="raytracer.camera" href="#raytracer.camera">camera</a></code></li>
 <li><code><a title="raytracer.color_light" href="#raytracer.color_light">color_light</a></code></li>
 <li><code><a title="raytracer.depth_max" href="#raytracer.depth_max">depth_max</a></code></li>
-<li><code><a title="raytracer.h" href="#raytracer.h">h</a></code></li>
+<li><code><a title="raytracer.height" href="#raytracer.height">height</a></code></li>
 <li><code><a title="raytracer.img" href="#raytracer.img">img</a></code></li>
 <li><code><a title="raytracer.scene" href="#raytracer.scene">scene</a></code></li>
-<li><code><a title="raytracer.w" href="#raytracer.w">w</a></code></li>
+<li><code><a title="raytracer.width" href="#raytracer.width">width</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>

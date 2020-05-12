@@ -69,22 +69,22 @@
       <B style="font-size: 28px;">The idea behind a tracer</B><br><br>
       <p>We achieve a 2d image of a 3d scene here. We did this in the following steps:
           <li>We stationed a light source ( <i>white light here</i>) at one point on our 3D plane , and a camera on another point on the 3D plane. Now we allow our camera to scan through our entire window <i>(currently at 400px x 300px)</i> , pixel by pixel. For this we send rays from the camera to the center of that particular pixel. The origin point of this ray is called as ray origin and the direction of the ray is stored as ray direction. Now , we move along with the ray and check for any intersection with an object. If there were no intersection , we return the background colour . If it intersects , we proceed further.</li>
-          <img src="resources/2dto3d.gif" alt="A 2D image from a 3D scene"><br>
+          <img src="../../resources/2dto3d.gif" alt="A 2D image from a 3D scene"><br>
           
               <ol>
-                <img src="resources/sphere-intersection.png">
+                <img src="../../resources/sphere-intersection.png">
                       
                 <br><br><li>
                       <b>Intersection of the ray with sphere</b>
                       <p>We assumed that our ray starting from ray origin and going in direction ray direction is going to intersect our sphere at two points. We found out '<u>l</u>' , the vector from rayorigin to '<u>C</u>' , the centre of our sphere. We draw a perpendicular from <u>C</u> to our ray which intersects it at '<u>tca</u>'. We then use the pythagoras theorem to find '<u>thc</u>'. Now to get the intersection points '<u>t0</u>' and '<u>t1</u>' we can add and subtract '<u>thc</u>' to '<u>tca</u>'. The nearest point of the two will be '<u>t</u>'. Now , we want to access this point in terms of rayorigin and raydirection. Hence we represent it at '<u>phit</u>' in the picture or '<u>M</u>' in our code.</p>
                   </li>
-                  <img src="resources/plane-intersection.png">
+                  <img src="../../resources/plane-intersection.png">
                   <br><br><li>
                       <b>Intersection of the ray with plane</b>
                       <p>We have represented our plane using one random point on the plane , '<u>P0</u>'' and a normal away from the plane '<u>N</u>'. Assuming that the ray intersects the plane at '<u>P</u>', any ray '<u>P0-->P</u>' will always be perpendicular to our normal '<u>N</u>' and hence, their dot product will always be zero.We use this condition to check if there is any point of intersection in our code.</p>
                   </li>
               </ol>
-              <img src = "resources/reflection.gif">
+              <img src = "../../resources/reflection.gif">
               <li>
                   <b>
                       Getting ahead with reflection and shadows
@@ -98,7 +98,7 @@
                     <p>We have also added Blinn-Phong shading. It is used for highlighting the pixel where light hits the sphere squarely, that is , it will be completely illuminated ,i.e. , in white colour.This is an optional feature we added up .</p>
                 </li>
                 <p>Finally, we repeat the complete process untill the complete image . The final image looks something like this :
-                    <img src="resources/final.png"></p>
+                    <img src="../../resources/final.png"></p>
       </p>
       
         
